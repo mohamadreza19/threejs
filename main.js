@@ -1,8 +1,7 @@
 import * as THREE from "three";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-// Scene setup
+// تنظیم صحنه
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -10,46 +9,56 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-camera.position.set(0, 2, 5); // Adjust camera position to view model
+camera.position.set(0, 2, 5);
 
-// WebGL renderer
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+document.body.appendChild(renderer.domElement); // اضافه کردن رندرر به DOM
 
-// GLTF model loader
-const loader = new GLTFLoader();
-loader.load(
-  "./cardboard_buddy.glb",
-  function (gltf) {
-    const model = gltf.scene;
-    model.scale.set(1, 1, 1); // Adjust the scale if needed
-    model.position.set(0, 0, 0); // Position it at the origin
-    console.log(gltf); // Inspect the loaded model in the console
-    scene.add(model);
-  },
-  undefined,
-  function (error) {
-    console.error(error);
-  }
-);
+const controls = new OrbitControls(camera, renderer.domElement); // فعال کردن کنترل‌های مداری
 
-// Lighting
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(1, 1, 1).normalize();
-scene.add(directionalLight);
+const MAX_POINTS = 500;
 
-const ambientLight = new THREE.AmbientLight(0x404040); // Soft white light
-scene.add(ambientLight);
+// geometry
+const geometry = new THREE.BufferGeometry();
 
-// Orbit controls
-const controls = new OrbitControls(camera, renderer.domElement);
+// attributes
+const positions = new Float32Array(MAX_POINTS * 3); // 3 مختصات به ازای هر نقطه
+geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
 
-// Render loop
+// draw range
+const drawCount = MAX_POINTS; // رسم تمامی نقاط
+geometry.setDrawRange(0, drawCount);
+
+// material
+const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+
+// line
+const line = new THREE.Line(geometry, material);
+scene.add(line);
+
+const positionAttribute = line.geometry.getAttribute("position");
+
+let x = 0,
+  y = 0,
+  z = 0;
+
+for (let i = 0; i < positionAttribute.count; i++) {
+  positionAttribute.setXYZ(i, x, y, z);
+
+  x += (Math.random() - 0.5) * 30;
+  y += (Math.random() - 0.5) * 30;
+  z += (Math.random() - 0.5) * 30;
+}
+
+positionAttribute.needsUpdate = true; // به‌روزرسانی attribute
+
+// حلقه انیمیشن
 function animate() {
   requestAnimationFrame(animate);
-  controls.update(); // For interactive controls
+
+  controls.update(); // به‌روزرسانی کنترل‌ها
   renderer.render(scene, camera);
 }
 
-animate();
+animate(); // اجرای انیمیشن
