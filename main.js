@@ -1,63 +1,55 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+// Scene setup
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+camera.position.set(0, 2, 5); // Adjust camera position to view model
+
+// WebGL renderer
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const camera = new THREE.PerspectiveCamera(
-  45,
-  window.innerWidth / window.innerHeight,
-  1,
-  500
+// GLTF model loader
+const loader = new GLTFLoader();
+loader.load(
+  "./cardboard_buddy.glb",
+  function (gltf) {
+    const model = gltf.scene;
+    model.scale.set(1, 1, 1); // Adjust the scale if needed
+    model.position.set(0, 0, 0); // Position it at the origin
+    console.log(gltf); // Inspect the loaded model in the console
+    scene.add(model);
+  },
+  undefined,
+  function (error) {
+    console.error(error);
+  }
 );
-camera.position.set(0, 0, 100);
-camera.lookAt(0, 0, 0);
 
-const scene = new THREE.Scene();
+// Lighting
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(1, 1, 1).normalize();
+scene.add(directionalLight);
 
-const material = new THREE.LineBasicMaterial({ color: "red" });
+const ambientLight = new THREE.AmbientLight(0x404040); // Soft white light
+scene.add(ambientLight);
 
-// const points = [];
-// points.push(new THREE.Vector3(-10, 0, 0));
-// points.push(new THREE.Vector3(0, 7, 0));
-// // points.push(new THREE.Vector3(10, 0, 0));
+// Orbit controls
+const controls = new OrbitControls(camera, renderer.domElement);
 
-// const geometry = new THREE.BufferGeometry().setFromPoints(points);
-const geometry = new THREE.BufferGeometry();
-
-const line = new THREE.Line(geometry, material);
-
-scene.add(line);
-let line1 = 0; // مقدار اولیه برای خط اول
-let line2 = 0; // مقدار اولیه برای خط دوم
-let line3 = 0; // مقدار اولیه برای خط دوم
-let speed1 = 0.05; // سرعت تغییر مقدار line1
-let speed2 = 0.03; // سرعت تغییر مقدار line2
-
+// Render loop
 function animate() {
-  // تغییر مقدار line1 و line2 به آرامی با سرعت مشخص
-  line1 += speed1;
-  line2 += speed2;
-
-  // اطمینان از اینکه مقدارها در محدوده‌ی مشخص باقی بمانند
-  if (line1 > 10 || line1 < -10) {
-    speed1 = -speed1; // اگر خط به انتهای محدوده رسید، جهت حرکت را معکوس کن
-  }
-  if (line2 > 10 || line2 < -10) {
-    speed2 = -speed2; // اگر خط به انتهای محدوده رسید، جهت حرکت را معکوس کن
-  }
-
-  const points = [];
-  points.push(new THREE.Vector3(line1, 0, 0)); // نقطه اول
-  points.push(new THREE.Vector3(0, line2, 0)); // نقطه دوم
-  points.push(new THREE.Vector3(0, line2, line3)); // نقطه دوم
-
-  geometry.setFromPoints(points); // به‌روزرسانی هندسه با نقاط جدید
-
-  renderer.render(scene, camera); // رندر کردن صحنه
+  requestAnimationFrame(animate);
+  controls.update(); // For interactive controls
+  renderer.render(scene, camera);
 }
 
-renderer.setAnimationLoop(animate); // شروع حلقه انیمیشن
-
-renderer.setAnimationLoop(animate);
-// renderer.render(scene, camera);
+animate();
