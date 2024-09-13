@@ -40,57 +40,26 @@ const cylinerGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
 const planeGeometry = new THREE.PlaneGeometry(1, 1);
 
 // Inital Material
-
-const lavarockAlbedo = textureLoader.load(
-  "texture/columned-lava-rock-bl/columned-lava-rock_albedo.png"
-);
-const lavarockAo = textureLoader.load(
-  "texture/columned-lava-rock-bl/columned-lava-rock_ao.png"
-);
-const lavarockHeight = textureLoader.load(
-  "texture/columned-lava-rock-bl/columned-lava-rock_height.png"
-);
-const lavarockMetallic = textureLoader.load(
-  "texture/columned-lava-rock-bl/columned-lava-rock_metallic.png"
-);
-const lavarockNormal = textureLoader.load(
-  "texture/columned-lava-rock-bl/columned-lava-rock_normal-ogl.png"
-);
-const lavarockRoughness = textureLoader.load(
-  "texture/columned-lava-rock-bl/columned-lava-rock_roughness.png"
-);
-
-const material = new THREE.MeshStandardMaterial();
-lavarockAlbedo.repeat.set(6, 6);
-material.map = lavarockAlbedo;
-material.aoMap = lavarockAo;
-material.roughnessMap = lavarockRoughness;
-material.metalnessMap = lavarockMetallic;
-material.normalMap = lavarockNormal;
-material.displacementMap = lavarockHeight;
-
-material.roughness = 1;
-material.metalness = 1;
-material.displacementScale = 0.1;
+const material = new THREE.MeshStandardMaterial({
+  metalness: 0.8,
+  roughness: 0.5,
+  wireframe: true,
+  // map: lavarockAlbedo,
+  // displacementMap: lavarockDisplacement,
+  // displacementScale: 0.1,
+});
+const material2 = new THREE.MeshStandardMaterial({
+  metalness: 0.8,
+  roughness: 0.5,
+  // wireframe: true,
+  // map: lavarockAlbedo,
+  // displacementMap: lavarockDisplacement,
+  // displacementScale: 0.1,
+});
 
 // lavarockAlbedo.wrapS = THREE.MirroredRepeatWrapping;
 // lavarockAlbedo.wrapT = THREE.MirroredRepeatWrapping;
 
-lavarockAlbedo.wrapS = THREE.RepeatWrapping;
-lavarockAlbedo.wrapT = THREE.RepeatWrapping;
-
-pane.addBinding(lavarockAlbedo, "offset", {
-  x: {
-    min: 0,
-    max: 1,
-    step: 0.001,
-  },
-  y: {
-    min: 0,
-    max: 1,
-    step: 0.001,
-  },
-});
 // Inital Mesh
 
 const cubeMesh = new THREE.Mesh(cubegeometry, material);
@@ -98,7 +67,7 @@ const circleMesh = new THREE.Mesh(circleGeometry, material);
 const torusknotMesh = new THREE.Mesh(torusknotGeometry, material);
 const sphereMesh = new THREE.Mesh(sphereGeometry, material);
 const cylinerMesh = new THREE.Mesh(cylinerGeometry, material);
-const planeMesh = new THREE.Mesh(planeGeometry, material);
+const planeMesh = new THREE.Mesh(planeGeometry, material2);
 
 // Position Object
 
@@ -107,9 +76,9 @@ torusknotMesh.position.y = 2;
 sphereMesh.position.x = 2;
 cylinerMesh.position.y = -2;
 
-// planeMesh.rotation.x = THREE.MathUtils.degToRad(-90);
-// planeMesh.scale.set(100, 100, 100);
-
+planeMesh.rotation.x = THREE.MathUtils.degToRad(-90);
+planeMesh.scale.set(100, 100, 100);
+planeMesh.position.y = -4;
 // Orbit Controls
 
 // Add Scene
@@ -119,8 +88,8 @@ torusknotMesh.position.x = 2;
 
 // //Grouping
 const group = new THREE.Group();
-group.add(cubeMesh, torusknotMesh, sphereMesh, cylinerMesh, planeMesh);
-// scene.add(planeMesh);
+group.add(cubeMesh, torusknotMesh, sphereMesh, cylinerMesh);
+scene.add(planeMesh);
 scene.add(group);
 // const group = new THREE.Group();
 
@@ -129,38 +98,73 @@ scene.add(group);
 // group.add(cube3);
 
 // Inial light
-// حذف نورهای قبلی و تنظیم نورهای جدید
 
-// نور محیطی
-const ambientLight = new THREE.AmbientLight(0xffffff, 1); // قدرت نور محیطی را کاهش دادم
-scene.add(ambientLight);
+// const ambientLight = new THREE.AmbientLight(0xffffff, 0.4); // قدرت نور محیطی را کاهش دادم
+// scene.add(ambientLight);
 
-// نور نقطه‌ای
-const pointLight = new THREE.PointLight(0xffffff, 1, 100); // نور نقطه‌ای با دامنه بیشتر
-pointLight.position.set(10, 10, 10); // موقعیت نور نقطه‌ای را تنظیم کردم
-// scene.add(pointLight);
+// const hemisphereLight = new THREE.HemisphereLight(0xf57fb6, "black", 0.8);
+// scene.add(hemisphereLight);
 
-// اضافه کردن یک نور نقطه‌ای دیگر
-const pointLight2 = new THREE.PointLight(0xffaa00, 0.7, 50); // نور نقطه‌ای با رنگ متفاوت و شدت کمتر
-pointLight2.position.set(-10, 5, 10); // تنظیم موقعیت
-// scene.add(pointLight2);
-
-// نور جهت‌دار برای ایجاد سایه‌ها
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5); // شدت نور 0.5
-directionalLight.position.set(5, 10, 7); // موقعیت نور جهت‌دار را تنظیم کردم
+// const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
 // scene.add(directionalLight);
 
-// فعال کردن سایه‌ها
-directionalLight.castShadow = true; // فعال کردن سایه‌ها
-renderer.shadowMap.enabled = true; // فعال کردن سایه‌زنی در رندرر
-renderer.shadowMap.type = THREE.PCFSoftShadowMap; // نوع سایه‌زنی نرم
+// const directionalLightHelper = new THREE.DirectionalLightHelper(
+//   directionalLight
+// );
+// scene.add(directionalLightHelper);
 
-// scene.add(circleMesh);
+// const pointLight = new THREE.PointLight(0xffffff, 0.5);
+// scene.add(pointLight);
+
+// const pointLightLightHelper = new THREE.PointLightHelper(pointLight);
+// scene.add(pointLightLightHelper);
+
+const spotLight = new THREE.SpotLight(0xffffff, 0.5);
+
+const spotLightHelper = new THREE.SpotLightHelper(spotLight);
+scene.add(spotLight, spotLightHelper);
+spotLightHelper.position.y = 10;
+
+// directionalLight.position.copy(cubeMesh.position);
 
 // Pane
-// pane.addBinding(material, "metalness", { min: 0, max: 1, step: 0.01 });
-// pane.addBinding(material, "roughness", { min: 0, max: 1, step: 0.01 });
-// pane.addBinding(material, "reflectivity", { min: 0, max: 1, step: 0.01 });
+
+//color
+pane.addBinding(spotLight, "color", {
+  color: {
+    type: "float",
+  },
+});
+pane.addBinding(spotLight.position, "x", {
+  x: {
+    min: -10,
+    max: 10,
+    step: 0.01,
+  },
+});
+pane.addBinding(spotLight.position, "y", {
+  y: {
+    min: -10,
+    max: 10,
+    step: 0.01,
+  },
+});
+pane.addBinding(spotLight.position, "z", {
+  z: {
+    min: -10,
+    max: 10,
+    step: 0.01,
+  },
+});
+
+// intensity
+pane.addBinding(spotLight, "intensity", {
+  intensity: {
+    min: 0,
+    max: 1,
+    step: 0.01,
+  },
+});
 
 // Add AxesHelper
 // const axesHelper = new THREE.AxesHelper(10);
@@ -189,6 +193,8 @@ const renderLoop = () => {
   // console.log(currentTime);
 
   // cube.scale.x = Math.sin(currentTime) * 100;
+  // directionalLight.position.x = Math.sin(currentTime) * 100;
+  // directionalLight.position.y = Math.sin(currentTime) * 0.01;
 
   // group.scale.set(xMove, xMove, xMove);
 
