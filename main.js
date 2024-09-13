@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { mx_bilerp_1 } from "three/src/nodes/materialx/lib/mx_noise.js";
 import { Pane } from "tweakpane";
 
 // Inital
@@ -16,196 +15,111 @@ const camera = new THREE.PerspectiveCamera(
 
 const aspect = window.innerWidth / window.innerHeight;
 // const camera = new THREE.OrthographicCamera(-aspect, aspect, 1, -1, 4, 100);
-//
-// camera.position.y = 5;
-camera.position.x = 0;
-camera.position.z = 3;
-// camera.position.set(59, -77, 23);
+camera.position.set(0, 5, 10);
 
 const renderer = new THREE.WebGLRenderer({
-  // canvas: true,
   antialias: true,
 });
-
+renderer.shadowMap.enabled = true; // فعال کردن سایه‌ها
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; // نوع سایه
+renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-//Moving
-
-//Setup
-const cubegeometry = new THREE.BoxGeometry(1, 1, 1, 10, 10, 10);
-const circleGeometry = new THREE.CircleGeometry(1, 52);
+// Setup geometries
+const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
 const torusknotGeometry = new THREE.TorusKnotGeometry(0.5, 0.1, 100, 100);
 const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
 const cylinerGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
-const planeGeometry = new THREE.PlaneGeometry(1, 1);
+const planeGeometry = new THREE.PlaneGeometry(100, 100);
 
-// Inital Material
+// Material
 const material = new THREE.MeshStandardMaterial({
   metalness: 0.8,
   roughness: 0.5,
-  wireframe: true,
-  // map: lavarockAlbedo,
-  // displacementMap: lavarockDisplacement,
-  // displacementScale: 0.1,
-});
-const material2 = new THREE.MeshStandardMaterial({
-  metalness: 0.8,
-  roughness: 0.5,
-  // wireframe: true,
-  // map: lavarockAlbedo,
-  // displacementMap: lavarockDisplacement,
-  // displacementScale: 0.1,
 });
 
-// lavarockAlbedo.wrapS = THREE.MirroredRepeatWrapping;
-// lavarockAlbedo.wrapT = THREE.MirroredRepeatWrapping;
+const planeMaterial = new THREE.MeshStandardMaterial({
+  color: 0x808080,
+  roughness: 0.8,
+});
 
-// Inital Mesh
+// Meshes
+const cubeMesh = new THREE.Mesh(cubeGeometry, material);
+cubeMesh.position.set(-2, 1, 0);
+cubeMesh.castShadow = true; // فعال کردن سایه برای مکعب
 
-const cubeMesh = new THREE.Mesh(cubegeometry, material);
-const circleMesh = new THREE.Mesh(circleGeometry, material);
 const torusknotMesh = new THREE.Mesh(torusknotGeometry, material);
+torusknotMesh.position.set(2, 2, 0);
+torusknotMesh.castShadow = true;
+
 const sphereMesh = new THREE.Mesh(sphereGeometry, material);
+sphereMesh.position.set(0, 1, -2);
+sphereMesh.castShadow = true;
+
 const cylinerMesh = new THREE.Mesh(cylinerGeometry, material);
-const planeMesh = new THREE.Mesh(planeGeometry, material2);
+cylinerMesh.position.set(0, 1, 2);
+cylinerMesh.castShadow = true;
 
-// Position Object
+const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+planeMesh.rotation.x = -Math.PI / 2;
+planeMesh.position.y = 0;
+planeMesh.receiveShadow = true; // فعال کردن دریافت سایه برای سطح
 
-cubeMesh.position.x = -2;
-torusknotMesh.position.y = 2;
-sphereMesh.position.x = 2;
-cylinerMesh.position.y = -2;
-
-planeMesh.rotation.x = THREE.MathUtils.degToRad(-90);
-planeMesh.scale.set(100, 100, 100);
-planeMesh.position.y = -4;
-// Orbit Controls
-
-// Add Scene
-
-circleMesh.position.x = -1.5;
-torusknotMesh.position.x = 2;
-
-// //Grouping
+// Grouping and adding to scene
 const group = new THREE.Group();
 group.add(cubeMesh, torusknotMesh, sphereMesh, cylinerMesh);
-scene.add(planeMesh);
 scene.add(group);
-// const group = new THREE.Group();
+scene.add(planeMesh);
 
-// group.add(cube);
-// group.add(cube2);
-// group.add(cube3);
+// Initial lights
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); // نور محیطی
+scene.add(ambientLight);
 
-// Inial light
+const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6); // نور آسمان/زمین
+scene.add(hemisphereLight);
 
-// const ambientLight = new THREE.AmbientLight(0xffffff, 0.4); // قدرت نور محیطی را کاهش دادم
-// scene.add(ambientLight);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+directionalLight.position.set(5, 10, 7);
+directionalLight.castShadow = true; // فعال کردن سایه برای نور
+directionalLight.shadow.mapSize.width = 1024;
+directionalLight.shadow.mapSize.height = 1024;
+scene.add(directionalLight);
 
-// const hemisphereLight = new THREE.HemisphereLight(0xf57fb6, "black", 0.8);
-// scene.add(hemisphereLight);
+const pointLight = new THREE.PointLight(0xff0000, 0.7);
+pointLight.position.set(-3, 2, 3);
+pointLight.castShadow = true; // فعال کردن سایه برای نور نقطه‌ای
+scene.add(pointLight);
 
-// const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-// scene.add(directionalLight);
+const spotLight = new THREE.SpotLight(0x32a881, 1);
+spotLight.position.set(8, 6, 0);
+spotLight.target.position.set(0, 0, 0);
+spotLight.castShadow = true;
+// spotLight.shadow.mapSize.width = 1024;
+// spotLight.shadow.mapSize.height = 1024;
+scene.add(spotLight);
+// scene.add(spotLight.target);
 
-// const directionalLightHelper = new THREE.DirectionalLightHelper(
-//   directionalLight
-// );
-// scene.add(directionalLightHelper);
-
-// const pointLight = new THREE.PointLight(0xffffff, 0.5);
-// scene.add(pointLight);
-
-// const pointLightLightHelper = new THREE.PointLightHelper(pointLight);
-// scene.add(pointLightLightHelper);
-
-const spotLight = new THREE.SpotLight(0xffffff, 0.5);
-
-const spotLightHelper = new THREE.SpotLightHelper(spotLight);
-scene.add(spotLight, spotLightHelper);
-spotLightHelper.position.y = 10;
-
-// directionalLight.position.copy(cubeMesh.position);
-
-// Pane
-
-//color
-pane.addBinding(spotLight, "color", {
-  color: {
-    type: "float",
-  },
-});
-pane.addBinding(spotLight.position, "x", {
-  x: {
-    min: -10,
-    max: 10,
-    step: 0.01,
-  },
-});
-pane.addBinding(spotLight.position, "y", {
-  y: {
-    min: -10,
-    max: 10,
-    step: 0.01,
-  },
-});
-pane.addBinding(spotLight.position, "z", {
-  z: {
-    min: -10,
-    max: 10,
-    step: 0.01,
-  },
-});
-
-// intensity
-pane.addBinding(spotLight, "intensity", {
-  intensity: {
-    min: 0,
-    max: 1,
-    step: 0.01,
-  },
-});
-
-// Add AxesHelper
-// const axesHelper = new THREE.AxesHelper(10);
-// scene.add(axesHelper);
-// cube.add(axesHelper);
-
+// Controls
 const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-renderer.setSize(window.innerWidth, window.innerHeight);
-const maxPixelRatio = Math.min(window.devicePixelRatio, 2);
-renderer.setPixelRatio(maxPixelRatio);
-
-// Inital clock
-
+// Clock for animation
 const clock = new THREE.Clock();
-let previusTime = 0;
 
+// Render loop
 const renderLoop = () => {
-  // controls.enableDamping = true;
-  // controls.autoRotate = true;
+  const elapsedTime = clock.getElapsedTime();
 
-  const currentTime = clock.getElapsedTime();
+  // Animation: rotating the group of objects
+  group.rotation.y = elapsedTime * 0.2;
 
-  // group.position.x += Math.sin(currentTime) * 0.01;
-
-  // console.log(currentTime);
-
-  // cube.scale.x = Math.sin(currentTime) * 100;
-  // directionalLight.position.x = Math.sin(currentTime) * 100;
-  // directionalLight.position.y = Math.sin(currentTime) * 0.01;
-
-  // group.scale.set(xMove, xMove, xMove);
-
-  // camera.position.z = -(xMove + 0.1);
-  // renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.render(scene, camera);
-
   controls.update();
   window.requestAnimationFrame(renderLoop);
 };
 
+// Handling window resize
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
