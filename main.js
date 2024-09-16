@@ -72,23 +72,40 @@ scene.add(group);
 scene.add(planeMesh);
 
 // Initial lights
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); // نور محیطی
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.3); // نور محیطی
 scene.add(ambientLight);
 
 const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6); // نور آسمان/زمین
-scene.add(hemisphereLight);
+// scene.add(hemisphereLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-directionalLight.position.set(5, 10, 7);
+directionalLight.position.set(0, 10, 10);
+
+const directionalLightCameraHelper = new THREE.CameraHelper(
+  directionalLight.shadow.camera
+);
+
+// directionalLight.target.position.set(3, 10, 10);
 directionalLight.castShadow = true; // فعال کردن سایه برای نور
 directionalLight.shadow.mapSize.width = 1024;
 directionalLight.shadow.mapSize.height = 1024;
-scene.add(directionalLight);
+directionalLight.shadow.radius = 5;
+// directionalLight.shadow.camera.far = 50;
+directionalLight.shadow.camera.fov = 1;
+scene.add(directionalLight, directionalLightCameraHelper);
+
+// pane.addBinding(directionalLight.position.x, "x", {
+//   x: {
+//     min: 0,
+//     max: 50,
+//     step: 1,
+//   },
+// });
 
 const pointLight = new THREE.PointLight(0xff0000, 0.7);
 pointLight.position.set(-3, 2, 3);
 pointLight.castShadow = true; // فعال کردن سایه برای نور نقطه‌ای
-scene.add(pointLight);
+// scene.add(pointLight);
 
 const spotLight = new THREE.SpotLight(0x32a881, 1);
 spotLight.position.set(8, 6, 0);
@@ -96,8 +113,13 @@ spotLight.target.position.set(0, 0, 0);
 spotLight.castShadow = true;
 // spotLight.shadow.mapSize.width = 1024;
 // spotLight.shadow.mapSize.height = 1024;
-scene.add(spotLight);
+// scene.add(spotLight);
 // scene.add(spotLight.target);
+
+//
+
+const axesHelper = new THREE.AxesHelper();
+scene.add(axesHelper);
 
 // Controls
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -112,7 +134,7 @@ const renderLoop = () => {
   const elapsedTime = clock.getElapsedTime();
 
   // Animation: rotating the group of objects
-  group.rotation.y = elapsedTime * 0.2;
+  // group.rotation.y = elapsedTime * 0.2;
 
   renderer.render(scene, camera);
   controls.update();
