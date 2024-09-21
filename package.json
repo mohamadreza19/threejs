@@ -16,8 +16,12 @@
   },
   "type": "module",
   "dependencies": {
+    "@dimforge/rapier3d": "^0.14.0",
     "lil-gui": "^0.18.2",
-    "three": "^0.157.0"
+    "three": "^0.157.0",
+    "vite-plugin-top-level-await": "^1.4.4",
+    "vite-plugin-wasm": "^3.3.0",
+    "zustand": "^5.0.0-rc.2"
   },
   "devDependencies": {
     "@types/three": "^0.156.0",
